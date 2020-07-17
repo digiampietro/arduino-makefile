@@ -64,12 +64,12 @@
 MAKE_DIR   := $(PWD)
 #
 # ----- setup wor Wemos D1 mini -----
-#FQBN       ?= esp8266:esp8266:d1_mini
-#IOT_NAME   ?= esp8266-meteo
-#OTA_PORT   ?= 8266
-#OTA_PASS   ?=
+FQBN       ?= esp8266:esp8266:d1_mini
+IOT_NAME   ?= esp8266-blink
+OTA_PORT   ?= 8266
+OTA_PASS   ?=
 # ----- setup for Arduino Uno
-FQBN        ?= arduino:avr:uno
+#FQBN        ?= arduino:avr:uno
 # ----- ---------------------
 V          ?= 0
 VFLAG      =

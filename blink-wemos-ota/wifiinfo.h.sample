@@ -1,0 +1,8 @@
+// Copy this file to wifiinfo.h and change the following definitions
+// to suit your WiFi environment
+
+#ifndef wifiinfo_h
+#define wifiinfo_h
+const char* ssid = "mySSID";
+const char* password = "myPASSWORD";
+#endif
