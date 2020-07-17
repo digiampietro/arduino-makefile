@@ -4,13 +4,13 @@
 //
 // This include file provides the functions
 //    setupWifi(hostname)
-//       hostname is an optional parameter, this function will
+//       hostname can be an empty string; this function will
 //       establish the wifi connections, WiFi credentials are supplied
 //       in the file "wifiinfo.h", see "wifiinfo.h.sample"
 //    setupOTA(hostname)
-//       hostname is an optional parameter, usefule to retrieve the
+//       hostname can be an empty string; will be used to retrieve the
 //       correct board to upgrade Over The Air.
-//       If not included the default name is chosen (esp8266-[ChipID])
+//       If an empty string the default name is esp8266-[ChipID]
 // The above 2 functions must be called in the setup() function
 //
 // in the loop function the function
@@ -37,15 +37,17 @@ void setupWifi(char hostname[]) {
   if (sizeof(hostname) > 0) {
     WiFi.hostname(hostname);
   }
-  Serial.println("Connecting ");
+  if (Serial) {Serial.println("Connecting ");}
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
-    Serial.print(".");
+    if (Serial) {Serial.print(".");}
     delay(500);
   }
-  Serial.println(".");
-  Serial.print("Connected! IP: ");
-  Serial.println(WiFi.localIP());
+  if (Serial) {
+    Serial.println(".");
+    Serial.print("Connected! IP: ");
+    Serial.println(WiFi.localIP());
+  }
 }
 
 
@@ -66,31 +68,31 @@ void setupOTA(char hostname[]) {
   // ArduinoOTA.setPassword((const char *)"123");
 
   ArduinoOTA.onStart([]() {
-    Serial.println("Start");
+      if (Serial) {Serial.println("Start");}
   });
   ArduinoOTA.onEnd([]() {
-    Serial.println("\nEnd");
+      if (Serial) {Serial.println("\nEnd");}
   });
   ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-    Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+      if (Serial) {Serial.printf("Progress: %u%%\r", (progress / (total / 100)));}
   });
   ArduinoOTA.onError([](ota_error_t error) {
-    Serial.printf("Error[%u]: ", error);
-    if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
-    else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
-    else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
-    else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
-    else if (error == OTA_END_ERROR) Serial.println("End Failed");
+      if (Serial) {
+	Serial.printf("Error[%u]: ", error);
+	if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
+	else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
+	else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
+	else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
+	else if (error == OTA_END_ERROR) Serial.println("End Failed");
+      }
   });
   ArduinoOTA.begin();
-  Serial.println("Ready");
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
+  if (Serial) {
+    Serial.println("Ready");
+    Serial.print("IP address: ");
+    Serial.println(WiFi.localIP());
+  }
 }
 
-void setupOTA() {
-  char hostname[] = "";
-  setupOTA(hostname);
-}
 
 #endif

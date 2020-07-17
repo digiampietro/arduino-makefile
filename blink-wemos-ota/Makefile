@@ -65,7 +65,7 @@ MAKE_DIR   := $(PWD)
 #
 # ----- setup wor Wemos D1 mini -----
 FQBN       ?= esp8266:esp8266:d1_mini
-IOT_NAME   ?= esp8266-meteo
+IOT_NAME   ?= esp8266-blink
 OTA_PORT   ?= 8266
 OTA_PASS   ?=
 # ----- setup for Arduino Uno
@@ -92,7 +92,8 @@ BUILD_DIR  := $(subst :,.,build/$(FQBN))
 
 SRC        := $(wildcard *.ino)
 HDRS       := $(wildcard *.h)
-BIN        := $(BUILD_DIR)/$(SRC).elf
+BIN        := $(BUILD_DIR)/$(SRC).bin
+ELF        := $(BUILD_DIR)/$(SRC).elf
 
 $(info FQBN       is [${FQBN}])
 $(info IOT_NAME   is [${IOT_NAME}])
@@ -107,13 +108,13 @@ $(info HDRS       is [${HDRS}])
 $(info BIN        is [${BIN}])
 $(info SERIAL_DEV is [${SERIAL_DEV}])
 
-all: $(BIN) upload
+all: $(ELF) upload
 .PHONY: all
 
-compile: $(BIN)
+compile: $(ELF)
 .PHONY: compile
 
-$(BIN): $(SRC) $(HDRS)
+$(ELF): $(SRC) $(HDRS)
 	arduino-cli compile -b $(FQBN) $(VFLAG)
 	@if which arduino-manifest.pl; \
 	then echo "---> Generating manifest.txt"; \
@@ -122,7 +123,7 @@ $(BIN): $(SRC) $(HDRS)
 	echo "---> please install arduino-manifest, see https://github.com/digiampietro/arduino-manifest"; \
 	fi
 
-upload: $(BIN)
+upload: $(ELF)
 	@if [ ! -c $(SERIAL_DEV) ] ; \
 	then echo "---> ERROR: Serial Device not available, please set the SERIAL_DEV environment variable" ; \
 	else echo "---> Uploading sketch\n"; \
