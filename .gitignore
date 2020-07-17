@@ -1,0 +1,5 @@
+wifiinfo.h
+build
+*~
+*.old
+
