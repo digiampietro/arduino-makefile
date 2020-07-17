@@ -92,7 +92,7 @@ BUILD_DIR  := $(subst :,.,build/$(FQBN))
 
 SRC        := $(wildcard *.ino)
 HDRS       := $(wildcard *.h)
-BIN        := $(BUILD_DIR)/$(SRC).bin
+BIN        := $(BUILD_DIR)/$(SRC).elf
 
 $(info FQBN       is [${FQBN}])
 $(info IOT_NAME   is [${IOT_NAME}])
@@ -117,7 +117,7 @@ $(BIN): $(SRC) $(HDRS)
 	arduino-cli compile -b $(FQBN) $(VFLAG)
 	@if which arduino-manifest.pl; \
 	then echo "---> Generating manifest.txt"; \
-	arduino-manifest.pl $(SRC) $(HDRS) > manifest.txt; \
+	arduino-manifest.pl -b $(FQBN) $(SRC) $(HDRS) > manifest.txt; \
 	else echo "---> If you want to generate manifest.txt, listing used libraries and their versions,"; \
 	echo "---> please install arduino-manifest, see https://github.com/digiampietro/arduino-manifest"; \
 	fi
@@ -125,7 +125,8 @@ $(BIN): $(SRC) $(HDRS)
 upload: $(BIN)
 	@if [ ! -c $(SERIAL_DEV) ] ; \
 	then echo "---> ERROR: Serial Device not available, please set the SERIAL_DEV environment variable" ; \
-	else arduino-cli upload -b $(FQBN) -p $(SERIAL_DEV) $(VFLAG); \
+	else echo "---> Uploading sketch\n"; \
+	arduino-cli upload -b $(FQBN) -p $(SERIAL_DEV) $(VFLAG); \
 	fi
 
 ota: $(BIN)
@@ -137,7 +138,8 @@ ota: $(BIN)
 	echo "IOT_IP:    is [$$IOT_IP]"   ; \
 	if [ "$$IOT_IP" = "" ] ; \
 	then echo "Unable to find device IP. Check that the IOT_NAME environment variable is correctly set. Use 'make find' to search devices"; \
-	else $$PY_PATH/python3 $$PLAT_PATH/tools/espota.py -i $$IOT_IP -p $(OTA_PORT) --auth=$(OTA_PASS) -f $(BIN) ;\
+	else echo "---> Uploading Over The Air"; \
+	$$PY_PATH/python3 $$PLAT_PATH/tools/espota.py -i $$IOT_IP -p $(OTA_PORT) --auth=$(OTA_PASS) -f $(BIN) ;\
 	fi
 
 clean:
@@ -145,4 +147,4 @@ clean:
 	rm -rf build
 
 find:
-	avahi-browse _arduino._tcp --resolve --terminate
+	avahi-browse _arduino._tcp --resolve --parsable --terminate
