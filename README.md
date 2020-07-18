@@ -27,8 +27,8 @@ To use one of these makefiles on another project:
   
 * change the *FQBN* (*Fully Qualified Board Name*) variable inside the
   Makefile, to the correct value for the project; the command
-  *"arduino-cli board listall"* is available to get a list of vailable
-  board names and their fqbn;
+  *"arduino-cli board listall"* is available to get a list of
+  available board names and their fqbn;
 
 * for WiFi enabled boards change also the *IOT_NAME* variable inside
   the Makefile and in the source file, to the device hostname; this
