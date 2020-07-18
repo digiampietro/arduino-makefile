@@ -1,5 +1,5 @@
-Library Name                        Version    Author                    Architecture
------------------------------------ ---------- ------------------------- ---------------
-ArduinoOTA                          1.0        Ivan Grokhotkov and Migue esp8266
-ESP8266WiFi                         1.0        Ivan Grokhotkov           esp8266
-ESP8266mDNS                         1.2        multiple, see files       esp8266
+Library Name                        Version    Author                    Architecture    Type
+----------------------------------- ---------- ------------------------- --------------- -------
+ESP8266mDNS                         1.2        multiple, see files       esp8266         system
+ArduinoOTA                          1.0        Ivan Grokhotkov and Migue esp8266         system
+ESP8266WiFi                         1.0        Ivan Grokhotkov           esp8266         system

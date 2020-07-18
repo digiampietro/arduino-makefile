@@ -20,18 +20,22 @@
 #                IP address using the IOT_NAME (device hostname)
 #      - clean   clean the build directory
 #      - find    find OTA updatable devices on the local subnet
+#      - requirements it the file "requirements.txt" exists it will
+#                     install the libraries listed in this file
 #
 #      default is "all"
 #
 #   3. it gets the name of the sketch using the wildcard make command;
-#      the name is *.ino; this means that you must have ONLY a file with
-#      .ino extension, otherwise this makefile will break.
-#      This also means that you can use this Makefile, unmodified, for
-#      any sketch as long as you keep a single .ino file in each folder
+#      the name is *.ino; this means that you must have ONLY a file
+#      with .ino extension, otherwise this makefile will break.  This
+#      also means that you can use this Makefile, almost unmodified,
+#      for any sketch as long as you keep a single .ino file in each
+#      folder
 #
-#   4. you can split your project in multiple files, if you wish, using a
-#      sinle .ino file and multiple .h files, that you can include in the
-#      .ino file with an '#include "myfile.h"' directive
+#   4. you can split your project in multiple files, if you wish,
+#      using a single .ino file and multiple .h files, that you can
+#      include in the .ino file with an '#include "myfile.h"'
+#      directive
 #
 # Optionally some environment variables can be set:
 #
@@ -57,7 +61,7 @@
 #               it will be assigned the default value of an empty string
 #
 #   V           verbose flag; can be 0 (quiet) or 1 (verbose); if not set
-#               in the environment it will bi assigned a default value
+#               in the environment it will be assigned a default value
 #               in this makefile
 
 
@@ -92,7 +96,8 @@ BUILD_DIR  := $(subst :,.,build/$(FQBN))
 
 SRC        := $(wildcard *.ino)
 HDRS       := $(wildcard *.h)
-BIN        := $(BUILD_DIR)/$(SRC).elf
+BIN        := $(BUILD_DIR)/$(SRC).bin
+ELF        := $(BUILD_DIR)/$(SRC).elf
 
 $(info FQBN       is [${FQBN}])
 $(info IOT_NAME   is [${IOT_NAME}])
@@ -107,13 +112,13 @@ $(info HDRS       is [${HDRS}])
 $(info BIN        is [${BIN}])
 $(info SERIAL_DEV is [${SERIAL_DEV}])
 
-all: $(BIN) upload
+all: $(ELF) upload
 .PHONY: all
 
-compile: $(BIN)
+compile: $(ELF)
 .PHONY: compile
 
-$(BIN): $(SRC) $(HDRS)
+$(ELF): $(SRC) $(HDRS)
 	arduino-cli compile -b $(FQBN) $(VFLAG)
 	@if which arduino-manifest.pl; \
 	then echo "---> Generating manifest.txt"; \
@@ -122,24 +127,26 @@ $(BIN): $(SRC) $(HDRS)
 	echo "---> please install arduino-manifest, see https://github.com/digiampietro/arduino-manifest"; \
 	fi
 
-upload: $(BIN)
+upload:
 	@if [ ! -c $(SERIAL_DEV) ] ; \
 	then echo "---> ERROR: Serial Device not available, please set the SERIAL_DEV environment variable" ; \
 	else echo "---> Uploading sketch\n"; \
 	arduino-cli upload -b $(FQBN) -p $(SERIAL_DEV) $(VFLAG); \
 	fi
 
-ota: $(BIN)
+ota:
 	@PLAT_PATH=`arduino-cli compile -b $(FQBN) --show-properties | grep '^runtime.platform.path' | awk -F= '{print $$2}'` ; \
 	   PY_PATH=`arduino-cli compile -b $(FQBN) --show-properties | grep '^runtime.tools.python3.path' | awk -F= '{print $$2}'` ; \
-	IOT_IP=`avahi-browse _arduino._tcp --resolve --parsable --terminate|grep -i ';$(IOT_NAME);'|grep ';$(OTA_PORT);'| awk -F\; '{print $$8}'`; \
+	IOT_IP=`avahi-browse _arduino._tcp --resolve --parsable --terminate|grep -i ';$(IOT_NAME);'|grep ';$(OTA_PORT);'| awk -F\; '{print $$8}'|head -1`; \
+	BINFILE=$(wildcard $(BUILD_DIR)/$(SRC)*bin); \
 	echo "PLAT_PATH  is [$$PLAT_PATH]" ; \
 	echo "PY_PATH:   is [$$PY_PATH]"  ; \
 	echo "IOT_IP:    is [$$IOT_IP]"   ; \
+	echo "BINFILE:   is [$$BINFILE]"  ; \
 	if [ "$$IOT_IP" = "" ] ; \
 	then echo "Unable to find device IP. Check that the IOT_NAME environment variable is correctly set. Use 'make find' to search devices"; \
 	else echo "---> Uploading Over The Air"; \
-	$$PY_PATH/python3 $$PLAT_PATH/tools/espota.py -i $$IOT_IP -p $(OTA_PORT) --auth=$(OTA_PASS) -f $(BIN) ;\
+	$$PY_PATH/python3 $$PLAT_PATH/tools/espota.py -i $$IOT_IP -p $(OTA_PORT) --auth=$(OTA_PASS) -f $$BINFILE ;\
 	fi
 
 clean:
@@ -148,3 +155,15 @@ clean:
 
 find:
 	avahi-browse _arduino._tcp --resolve --parsable --terminate
+
+requirements:
+	@if [ -e requirements.txt ]; \
+	then while read -r i ; do echo ; \
+	  echo "---> Installing " '"'$$i'"' ; \
+	  arduino-cli lib install "$$i" ; \
+	done < requirements.txt ; \
+	else echo "---> MISSING requirements.txt file"; \
+	fi
+
+
+
