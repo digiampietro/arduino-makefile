@@ -1,0 +1,11 @@
+{
+  "config": {
+    "fqbn": "esp8266:esp8266:d1_mini",
+    "serial": "/dev/ttyUSB0",
+    "iot_name": "esp8266-blink",
+    "ota_port": "8266",
+    "verbosity": "0",
+    "ota_pass": ""
+  }
+}
+
