@@ -1,0 +1,7 @@
+{
+  "cpu": {
+    "fqbn": "arduino:avr:uno",
+    "port": "/dev/ttyUSB0"
+  }
+}
+
