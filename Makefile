@@ -66,19 +66,13 @@
 
 CONFIGFILE=compilerconfig.json
 
-FQBN       ?= $(shell [ -e $(CONFIGFILE) ] && jq 'if .cpu.fqbn? then .cpu.fqbn|. else "" end' $(CONFIGFILE) )
-SERIAL_DEV ?= $(shell [ -e $(CONFIGFILE) ] && jq 'if .cpu.port? then .cpu.port|. else "" end' $(CONFIGFILE) )
+FQBN       ?= $(shell [ -e $(CONFIGFILE) ] && jq 'if .config.fqbn? then .config.fqbn|. else "" end' $(CONFIGFILE) )
+SERIAL_DEV ?= $(shell [ -e $(CONFIGFILE) ] && jq 'if .config.serial? then .config.serial|. else "" end' $(CONFIGFILE) )
+IOT_NAME   ?= $(shell [ -e $(CONFIGFILE) ] && jq 'if .config.iot_name? then .config.iot_name|. else "" end' $(CONFIGFILE) )
+OTA_PORT   ?= $(shell [ -e $(CONFIGFILE) ] && jq 'if .config.ota_port? then .config.ota_port|. else "" end' $(CONFIGFILE) )
+OTA_PASS   ?= $(shell [ -e $(CONFIGFILE) ] && jq 'if .config.ota_pass? then .config.ota_pass|. else "" end' $(CONFIGFILE) )
+V          ?= $(shell [ -e $(CONFIGFILE) ] && jq 'if .config.verbosity? then .config.verbosity|. else "0" end' $(CONFIGFILE) )
 MAKE_DIR   := $(PWD)
-#
-# ----- setup wor Wemos D1 mini -----
-#FQBN       ?= esp8266:esp8266:d1_mini
-#IOT_NAME   ?= esp8266-meteo
-#OTA_PORT   ?= 8266
-#OTA_PASS   ?=
-# ----- setup for Arduino Uno
-#FQBN        ?= arduino:avr:uno
-# ----- ---------------------
-V          ?= 0
 VFLAG      =
 
 ifeq "$(V)" "1"
@@ -136,8 +130,6 @@ help:
 	@echo '                        install the libraries listed in this file         '
 	@echo '                                                                          '
 	@echo '   default is "all"                                                       '
-
-
 
 all: $(ELF) upload
 .PHONY: all
